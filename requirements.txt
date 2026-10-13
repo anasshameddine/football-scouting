@@ -20,3 +20,4 @@ httpx
 pytest
 requests
 sqlglot
+matplotlib
