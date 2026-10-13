@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Couche bronze chargée telle quelle dans PostgreSQL (ingestion/load_postgres.py).
+    schema: raw
+    loaded_at_field: "_ingere_le::timestamptz"
+    freshness:
+      warn_after: {count: 8, period: day}
+      error_after: {count: 30, period: day}
+    tables:
+      - name: fbref_standard
+      - name: fbref_shooting
+      - name: fbref_misc
+      - name: fbref_playing_time
+      - name: understat_player_season
+      - name: tm_players
+      - name: tm_player_valuations
+      - name: tm_clubs
+      - name: tm_competitions
+
+  - name: mapping
+    description: Tables de rapprochement des identifiants (ingestion/matching.py).
+    schema: mapping
+    tables:
+      - name: team_understat
+      - name: player_understat
+      - name: player_transfermarkt

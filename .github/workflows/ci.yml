@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-et-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dépendances
+        run: pip install -r requirements.txt ruff
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Tests
+        # Les tests qui ont besoin des vraies données (API, dashboard) sont ignorés : elles ne sont pas dans le dépôt.
+        run: python -m pytest -q
+
+  dbt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install "dbt-core<1.12" "dbt-postgres<1.12"
+      - name: Vérifie que les modèles dbt se compilent (sans base de données)
+        working-directory: dbt
+        run: dbt parse --profiles-dir .
+
+  image-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fichiers produits par le pipeline (absents du dépôt) : remplacés par des vides
+        run: |
+          mkdir -p ml/models data/processed
+          touch ml/models/.keep data/processed/ml_base.csv.gz data/processed/joueurs_propres.csv
+      - name: Build de l'image de l'API
+        run: docker build -f docker/Dockerfile.api -t scouting-api .

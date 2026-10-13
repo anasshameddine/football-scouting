@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/
+*.zip
+*.lock
+mlruns/
+.ipynb_checkpoints/
+dbt/target/
+dbt/logs/
+mlflow.db
+mlruns/
+ml/models/

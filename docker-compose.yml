@@ -1,0 +1,84 @@
+﻿# Services de base : PostgreSQL (entrepÃ´t) et MinIO (stockage S3, couche bronze).
+# Le bucket "bronze" est crÃ©Ã© par le script d'ingestion.
+# Lancer : docker compose up -d
+services:
+  postgres:
+    # PostgreSQL 16 avec l'extension pgvector (recherche vectorielle de l'assistant).
+    # MÃªme version que postgres:16 : le volume pgdata existant est rÃ©utilisÃ© tel quel.
+    image: pgvector/pgvector:pg16
+    container_name: scouting_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Stockage objet compatible S3 (couche bronze). MinIO n'est plus publiÃ© depuis 2025 :
+  # RustFS est un remplaÃ§ant direct (mÃªme API S3, mÃªmes ports).
+  s3:
+    image: rustfs/rustfs:latest
+    container_name: scouting_s3
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY}
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # console web
+    volumes:
+      - s3data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    profiles: ["api"]
+
+  # Orchestration : docker compose --profile airflow up -d --build   puis http://localhost:8080 (admin / admin)
+  airflow:
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    container_name: scouting_airflow
+    profiles: ["airflow"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      # le pipeline voit les autres conteneurs par leur nom de service
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      S3_ENDPOINT: http://s3:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-bronze}
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/opt/project
+      - ./airflow/dags:/opt/airflow/dags
+      - airflowdata:/opt/airflow/db
+    command: >
+      bash -c "export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/db/airflow.db &&
+      airflow db migrate &&
+      (airflow users create --username admin --password admin --firstname a --lastname b --role Admin --email a@b.c || true) &&
+      (airflow scheduler &) && exec airflow webserver"
+
+volumes:
+  pgdata:
+  airflowdata:
+  s3data:

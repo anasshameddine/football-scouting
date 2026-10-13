@@ -1,0 +1,16 @@
+# Dépendances du pipeline de données (utilisées par l'image Airflow, dans un environnement séparé).
+soccerdata
+pandas
+numpy
+unidecode
+boto3
+pyarrow
+sqlalchemy
+psycopg2-binary
+dbt-core<1.12
+dbt-postgres<1.12
+xgboost
+scikit-learn
+mlflow
+tabulate
+requests

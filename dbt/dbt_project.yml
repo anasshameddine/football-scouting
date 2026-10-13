@@ -1,0 +1,29 @@
+name: scouting
+version: "1.0"
+config-version: 2
+profile: scouting
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+vars:
+  saison_courante: "2526"          # saison affichée dans le dashboard
+  exclure_ligues: ["FRA-Ligue 2"]  # absente de Transfermarkt : pas de valeur marchande
+  minutes_min: 450
+  tranche_low_max: 5000000
+  tranche_mid_max: 25000000
+  tranche_high_max: 70000000
+  maroc_tm_id: 3575                # équipe nationale du Maroc sur Transfermarkt
+
+models:
+  scouting:
+    staging:
+      +materialized: view
+      +schema: silver
+    intermediate:
+      +materialized: table
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold

@@ -1,0 +1,7 @@
+# Lint volontairement léger : erreurs réelles (imports inutilisés, noms indéfinis, syntaxe), pas de style.
+line-length = 120
+extend-exclude = ["venv", "notebooks", "dbt/target"]
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E402", "E731", "E741", "E702"]   # imports après declarer_ligues_extra(), lambdas et noms courts assumés

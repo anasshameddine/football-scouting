@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: dim_league
+    description: Un championnat par ligne, avec son code Transfermarkt.
+    columns:
+      - name: league
+        tests: [unique, not_null]
+      - name: tm_competition
+        tests: [not_null]
+
+  - name: dim_season
+    columns:
+      - name: season
+        tests: [unique, not_null]
+
+  - name: dim_club
+    columns:
+      - name: club_key
+        tests: [unique, not_null]
+
+  - name: dim_player
+    description: Un joueur par ligne (identifiant partagé entre saisons et graphies de nom).
+    columns:
+      - name: player_key
+        tests: [unique, not_null]
+      - name: player
+        tests: [not_null]
+      - name: is_moroccan
+        tests: [not_null]
+      - name: tm_match
+        description: Qualité du rapprochement avec Transfermarkt.
+        tests:
+          - accepted_values:
+              values: ['exact', 'proche']
+
+  - name: fact_player_season
+    description: Stats d'un joueur sur une saison (transferts regroupés), par 90 minutes.
+    columns:
+      - name: player_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_player'), field: player_key}
+      - name: season
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_season'), field: season}
+      - name: club_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_club'), field: club_key}
+      - name: league
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_league'), field: league}
+      - name: playing_time_min
+        tests: [not_null]
+
+  - name: fact_valuation
+    columns:
+      - name: player_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_player'), field: player_key}
+      - name: valeur_eur
+        tests: [not_null]
+
+  - name: mart_scouting
+    description: Table lue par le dashboard (saison courante, hors gardiens, minutes suffisantes).
+    columns:
+      - name: player
+        tests: [not_null]
+      - name: budget_tier
+        tests:
+          - accepted_values:
+              values: ['low', 'medium', 'high', 'superstar', 'inconnu']
+      - name: is_moroccan
+        tests: [not_null]
