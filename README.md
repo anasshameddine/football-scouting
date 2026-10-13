@@ -26,6 +26,7 @@ machine learning suivi dans MLflow, API, dashboard, assistant LLM local avec RAG
 | Entrepôt | S3 (bronze Parquet) → PostgreSQL → dbt (silver, gold en étoile), tests de qualité |
 | ML | similarité par percentiles et ACP, valeur marchande XGBoost (MLflow), joueurs sous-cotés |
 | Produit | dashboard Streamlit bilingue, API FastAPI, assistant IA local (Ollama) |
+| Valeur marchande | XGBoost : R² 0,88 et erreur médiane 32 % sur une saison jamais vue |
 | Assistant | texte vers SQL **28 / 30** justes (10 / 10 sur des questions jamais vues), RAG Wikipédia sur pgvector |
 | Industrialisation | Docker Compose, DAG Airflow hebdomadaire, GitHub Actions (lint, tests, dbt, image) |
 
@@ -91,8 +92,16 @@ pas mieux, les percentiles restent le défaut pour leur lisibilité.
 
 **Valeur marchande** : XGBoost sur le logarithme de la valeur Transfermarkt de fin de saison, découpage
 temporel strict (entraînement 2021-22 à 2023-24, validation 2024-25, test 2025-26 jamais vue), fourchette à 80 %
-calculée sur les résidus, essais comparés dans MLflow. Sur la saison de test : R² = **R2_TEST**, erreur médiane
-**ERREUR_TEST %**. Détail : `docs/modele_valeur_resultats.md`.
+calculée sur les résidus, essais comparés dans MLflow. Détail : `docs/modele_valeur_resultats.md`.
+
+| Essai (saison de test 2025-26) | R² | Erreur médiane | Estimations à ±50 % |
+|---|---|---|---|
+| Ridge linéaire, avec niveau du club | 0,84 | 36 % | 67 % |
+| XGBoost sans niveau du club | 0,74 | 46 % | 54 % |
+| **XGBoost avec niveau du club (retenu)** | **0,88** | **32 %** | **72 %** |
+
+Le niveau du club (valeur des coéquipiers) est la variable qui apporte le plus : sans elle, XGBoost fait moins bien
+qu'une régression linéaire qui l'a. Les scores de validation (R² 0,87) et de test sont proches : pas de surapprentissage.
 Un joueur est dit sous-coté si sa valeur réelle est sous la fourchette basse prédite (au moins 50 % d'écart,
 900 minutes, 28 ans maximum, valeur d'au moins 500 k€).
 
