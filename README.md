@@ -1,3 +1,5 @@
+![CI](https://github.com/anasshameddine/football-scouting/actions/workflows/ci.yml/badge.svg)
+
 # Scouting football : plateforme de données et dashboard
 
 Trouver les joueurs au profil le plus proche d'un joueur de référence, classés par budget
