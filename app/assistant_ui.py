@@ -6,13 +6,20 @@ la page l'explique au lieu de planter. Le reste du dashboard fonctionne sans eux
 """
 
 import html
+import os
 import sys
 import time
 from pathlib import Path
 
 import streamlit as st
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+RACINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RACINE))
+
+# Version en ligne (Streamlit Community Cloud) : ni Ollama ni PostgreSQL. On montre alors l'évaluation réelle.
+# Streamlit Cloud monte le dépôt sous /mount/src ; SCOUTING_DEMO=1 force ce mode en local.
+DEMO = bool(os.environ.get("SCOUTING_DEMO")) or Path("/mount/src").exists()
+EVALUATION = RACINE / "docs" / "assistant_evaluation.md"
 
 try:
     from assistant import llm, rag, report, sql_agent
@@ -142,8 +149,33 @@ def onglet_bio(t, lang):
                     st.markdown(f"[{t('Article Wikipédia', 'Wikipedia article')}]({s.url})")
 
 
+def _demo(t):
+    """Page Assistant de la version en ligne : explication + résultats réels de l'évaluation."""
+    st.info(t("Version en ligne : l'assistant utilise un modèle d'IA local (Ollama, qwen2.5:7b) et la base "
+              "PostgreSQL, qui ne tournent pas sur cet hébergement gratuit. Voici les résultats réels de son "
+              "évaluation sur 30 questions, avec les requêtes SQL qu'il a écrites. Le code et les instructions "
+              "pour le lancer sont sur GitHub.",
+              "Online version: the assistant uses a local AI model (Ollama, qwen2.5:7b) and the PostgreSQL "
+              "database, which do not run on this free hosting. Below are the real results of its evaluation "
+              "on 30 questions (in French), with the SQL queries it wrote. Code and setup instructions are on GitHub."))
+    if not EVALUATION.exists():
+        return
+    texte = EVALUATION.read_text(encoding="utf-8")
+    resume, _, requetes = texte.partition("## Requêtes générées")
+    st.markdown(resume.replace("# Assistant : précision", "#### Précision", 1))
+    if requetes.strip():
+        with st.expander(t("Voir les requêtes SQL générées", "Show the generated SQL queries")):
+            st.markdown(requetes)
+
+
 def bloc_rapport(t, lang, faits, cle):
     """Bouton + rapport de scouting d'un joueur (fiche ou page Assistant)."""
+    if DEMO:
+        st.info(t("Le rapport de scouting est rédigé par un modèle d'IA local (Ollama) : disponible dans la "
+                  "version locale du projet, pas dans cette démo en ligne.",
+                  "The scouting report is written by a local AI model (Ollama): available in the local "
+                  "version of the project, not in this online demo."))
+        return
     ok, msg = _etat(t)
     if not ok:
         st.info(msg)
@@ -186,6 +218,9 @@ def page_assistant(t, lang, chercher_joueurs, faits_pour):
             "Natural-language questions on the database and on player biographies, "
             "and scouting reports written from the project's data.") + '</div></div>',
         unsafe_allow_html=True)
+    if DEMO:
+        _demo(t)
+        return
     ok, msg = _etat(t)
     (st.caption if ok else st.warning)(msg if ok else msg + "  \n" + t(
         "Installation : https://ollama.com puis « ollama pull qwen2.5:7b » et « ollama pull bge-m3 ».",

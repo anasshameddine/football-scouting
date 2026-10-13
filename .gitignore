@@ -2,7 +2,14 @@ venv/
 __pycache__/
 *.pyc
 .env
-data/
+# Données : rien n'est versionné, sauf les 4 exports lus par le dashboard (démo en ligne)
+data/*
+!data/processed/
+data/processed/*
+!data/processed/joueurs_propres.csv
+!data/processed/valeur_predite.csv
+!data/processed/joueurs_sous_cotes.csv
+!data/processed/ml_base.csv.gz
 *.zip
 *.lock
 mlruns/

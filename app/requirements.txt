@@ -1,0 +1,9 @@
+# Dépendances du dashboard seul (Streamlit Community Cloud lit ce fichier, à côté de app.py).
+# Le pipeline complet utilise requirements.txt à la racine.
+streamlit
+pandas
+numpy
+plotly
+requests
+unidecode
+scikit-learn
