@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fichiers produits par le pipeline (absents du dépôt) : remplacés par des vides
+      - name: "Fichiers produits par le pipeline (absents du dépôt), remplacés par des fichiers vides"
         run: |
           mkdir -p ml/models data/processed
           touch ml/models/.keep data/processed/ml_base.csv.gz data/processed/joueurs_propres.csv
