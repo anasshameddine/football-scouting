@@ -1,5 +1,7 @@
 # Scouting football : de la donnée brute à l'assistant IA
 
+**Démo en ligne : https://football-scouting-hameddine.streamlit.app/**
+
 ![CI](https://github.com/anasshameddine/football-scouting/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Licence](https://img.shields.io/badge/licence-MIT-green)
@@ -11,12 +13,10 @@ sous-cotés et répond en langage naturel aux questions d'un recruteur. Focus su
 Le projet couvre toute la chaîne d'un data / IA engineer : ingestion, entrepôt en couches, modélisation dbt,
 machine learning suivi dans MLflow, API, dashboard, assistant LLM local avec RAG, orchestration et CI.
 
-<!-- Captures à ajouter à la fin du projet (docs/img/) :
 ![Dashboard](docs/img/dashboard.png)
 ![Fiche joueur](docs/img/fiche_joueur.png)
-![Assistant](docs/img/assistant.png)
-![DAG Airflow](docs/img/airflow_dag.png)
--->
+
+<!-- À ajouter : ![Assistant](docs/img/assistant.png)  ![DAG Airflow](docs/img/airflow_dag.png) -->
 
 ## En bref
 
