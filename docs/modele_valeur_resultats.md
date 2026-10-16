@@ -1,6 +1,6 @@
 # Modèle de valeur marchande : résultats
 
-Généré le 2026-10-13. Test = saison 2025-26, jamais vue pendant le réglage.
+Généré le 2026-10-15. Test = saison 2025-26, jamais vue pendant le réglage.
 
 | essai                            |   R² test |   Erreur médiane test (%) |   Part à ±50 % test (%) |   RMSE log test |   R² validation |   Erreur médiane validation (%) |
 |:---------------------------------|----------:|--------------------------:|------------------------:|----------------:|----------------:|--------------------------------:|

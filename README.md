@@ -18,7 +18,8 @@ machine learning suivi dans MLflow, API, dashboard, assistant LLM local avec RAG
 
 ![DAG Airflow](docs/img/airflow_dag.png)
 
-<!-- À ajouter : ![Assistant](docs/img/assistant.png) -->
+![Assistant : réponse](docs/img/assistant_1.png)
+![Assistant : requête SQL exécutée](docs/img/assistant_2.png)
 
 ## En bref
 
